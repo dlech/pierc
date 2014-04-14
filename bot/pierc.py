@@ -2,8 +2,6 @@
 #
 
 #libs
-from ircbot import SingleServerIRCBot
-from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 import irclib
 import sys
 import re
@@ -57,7 +55,7 @@ class Logger(irclib.SimpleIRCClient):
 	
 		self.last_ping = 0
 		self.ircobj.delayed_commands.append( (time.time()+5, self._no_ping, [] ) )
- 	
+
 		self.connect(self.server, self.port, self.nick, self.password, self.username, self.ircname, self.localaddress, self.localport, self.ssl, self.ipv6)
 	
 	def _no_ping(self):
@@ -135,7 +133,7 @@ class Logger(irclib.SimpleIRCClient):
 															self.mysql_password)
 			for message in self.message_cache:
 				db.insert_line(message["channel"], message["name"], message["time"], message["message"], message["type"] )
-			
+
 			db.commit()
 			if self.disconnect_countdown < 5:
 				self.disconnect_countdown = self.disconnect_countdown + 1
@@ -197,6 +195,5 @@ if __name__ == "__main__":
 		try:
 			main()
 		except irclib.ServerNotConnectedError:
-			print "Server Not Connected! Let's try again!"             
-        	time.sleep(float(reconnect_interval))
-            
+			print "Server Not Connected! Let's try again!"
+			time.sleep(float(reconnect_interval))
