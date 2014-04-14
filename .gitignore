@@ -1,1 +1,5 @@
 config.php
+mysql_config.txt
+irc_config.txt
+*.pyc
+.pydevproject
