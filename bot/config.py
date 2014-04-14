@@ -13,12 +13,14 @@ def config(filename):
         for line in db_file:
             if line.startswith("#"):
                 continue
-            temp = line.replace(":", "").split()
-            key = temp[0]
-            value = temp[1]
+            idx = line.index(":")
+            key = line[0:idx]
+            value = line[idx+1:len(line)].strip()
             config_data[key] = value
         db_file.close()
         return config_data
+    except ValueError:
+        print "bad line in ", filename
     except:
         print filename, "missing."
         exit();
