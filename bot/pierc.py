@@ -156,21 +156,18 @@ class Logger(irclib.SimpleIRCClient):
 				sys.exit( 0 )
 			connection.privmsg(self.channel, "Database connection lost! " + str(self.disconnect_countdown) + " retries until I give up entirely!" )
 			self.disconnect_countdown = self.disconnect_countdown - 1
-			
 
 	def on_pubmsg(self, connection, event):
 		text = event.arguments()[0]
 
 		# If you talk to the bot, this is how he responds.
 		if self.nick_reg.search(text):
-			if text.split(" ")[1] and text.split(" ")[1] == "quit":
-				connection.privmsg(self.channel, "Goodbye.")
-				self.on_ping( connection, event )
-				sys.exit( 0 ) 
-				
 			if text.split(" ")[1] and text.split(" ")[1] == "ping":
+				connection.privmsg(self.channel, "pong")
 				self.on_ping(connection, event)
 				return
+
+			connection.privmsg(self.channel, "I don't know what that means.")
 
 def main():
 	mysql_settings = config.config("mysql_config.txt")
