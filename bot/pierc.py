@@ -17,8 +17,10 @@ import config
 
 class Logger(irclib.SimpleIRCClient):
 	
-	def __init__(self, server, port, channel, nick, password, username, ircname, localaddress, localport, ssl, ipv6, 
-				mysql_server, mysql_port, mysql_database, mysql_user, mysql_password):
+	def __init__(self, server, port, channel, nick, password, username,
+				ircname, topic, localaddress, localport, ssl, ipv6,
+				mysql_server, mysql_port, mysql_database,
+				mysql_user, mysql_password):
 
 	
 		irclib.SimpleIRCClient.__init__(self)
@@ -32,6 +34,7 @@ class Logger(irclib.SimpleIRCClient):
 		self.password = password
 		self.username = username
 		self.ircname = ircname
+		self.topic = topic
 		self.localaddress = localaddress
 		self.localport = localport
 		self.ssl = ssl
@@ -118,6 +121,10 @@ class Logger(irclib.SimpleIRCClient):
 		if irclib.is_channel(self.target):
 			connection.join(self.target)
 
+	def on_join(self, connection, event):
+		if self.topic and irclib.is_channel(self.target):
+			connection.topic(self.target, self.topic)
+
 	def on_disconnect(self, connection, event):
 		self.on_ping(connection, event)
 		connection.disconnect()
@@ -176,18 +183,19 @@ def main():
 				irc_settings.get("password",None),
 				irc_settings.get("username",None),
 				irc_settings.get("ircname",None),
+				irc_settings.get("topic",None),
 				irc_settings.get("localaddress",""),
 				int(irc_settings.get("localport",0)),
 				bool(irc_settings.get("ssl",False)),
 				bool(irc_settings.get("ipv6",False)), 
-				
+
 				mysql_settings["server"],
 				int(mysql_settings["port"]),
 				mysql_settings["database"],
 				mysql_settings["user"],
 				mysql_settings["password"] ) 
 	c.start()
-	
+
 if __name__ == "__main__":
 	irc_settings = config.config("irc_config.txt")
 	reconnect_interval = irc_settings["reconnect"]
