@@ -78,19 +78,18 @@ class Logger(irclib.SimpleIRCClient):
 		   e.eventtype() == "quit" or
 		   e.eventtype() == "nick" or
 		   e.eventtype() == "pubmsg"):
-			try: 
+			try:
 				source = e.source().split("!")[0]
 
-				# Try to parse the channel name
-				try:
-					channel = e.target()[1:]
-				except TypeError:
-					channel = "undefined"
+				channel = self.channel[1:]
 
 			except IndexError:
 				source = ""
 			try:
-				text = e.arguments()[0]
+				if e.eventtype() == "nick":
+					text = e.target()
+				else:
+					text = e.arguments()[0]
 			except IndexError:
 				text = ""
 		
@@ -103,9 +102,6 @@ class Logger(irclib.SimpleIRCClient):
 							"message": text,
 							"type": e.eventtype(),
 							"time": str(datetime.datetime.utcnow()) } 
-							
-			if e.eventtype() == "nick":
-				message_dict["message"] = e.target()
 			
 			# Most of the events are pushed to the buffer. 
 			self.message_cache.append( message_dict )
@@ -122,6 +118,13 @@ class Logger(irclib.SimpleIRCClient):
 			connection.join(self.target)
 
 	def on_join(self, connection, event):
+		# only change topic if it is the bot joining
+		try:
+			source = event.source().split("!")[0]
+			if source != self.nick:
+				return
+		except IndexError:
+			return
 		if self.topic and irclib.is_channel(self.target):
 			connection.topic(self.target, self.topic)
 
