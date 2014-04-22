@@ -118,6 +118,13 @@ class Logger(irclib.SimpleIRCClient):
 			connection.join(self.target)
 
 	def on_join(self, connection, event):
+		# only change topic if it is the bot joining
+		try:
+			source = event.source().split("!")[0]
+			if source != self.nick:
+				return
+		except IndexError:
+			return
 		if self.topic and irclib.is_channel(self.target):
 			connection.topic(self.target, self.topic)
 
