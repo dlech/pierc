@@ -81,9 +81,9 @@ $(function() {
 // Hide all join/quit messages
 function hideJoinQuit() {
 	if ($('#join-quit-toggle').is(':checked')) {
-		$('#irc .join, #irc .quit').hide();
+		$('#irc .join, #irc .quit, #irc .part').hide();
 	} else {
-		$('#irc .join, #irc .quit').show();
+		$('#irc .join, #irc .quit, #irc .part').show();
 	}
 } 
 
