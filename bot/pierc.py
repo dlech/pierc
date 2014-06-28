@@ -157,7 +157,8 @@ class Logger(irclib.SimpleIRCClient):
 			print e
 			if self.disconnect_countdown <= 0:
 				sys.exit( 0 )
-			connection.privmsg(self.channel, "Database connection lost! " + str(self.disconnect_countdown) + " retries until I give up entirely!" )
+			if self.disconnect_countdown <= 3:
+				connection.privmsg(self.channel, "Database connection lost! " + str(self.disconnect_countdown) + " retries until I give up entirely!" )
 			self.disconnect_countdown = self.disconnect_countdown - 1
 
 	def on_pubmsg(self, connection, event):
