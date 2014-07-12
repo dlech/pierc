@@ -31,6 +31,10 @@ $(function() {
 	$("#join-quit-toggle").click(function(){
 		hideJoinQuit();
 	});
+
+	$("#github-toggle").click(function(){
+		hideGitHub();
+	});
 	
 	$("#inline-media-toggle").click(function(){
 		toggleInlineMedia();
@@ -86,6 +90,14 @@ function hideJoinQuit() {
 		$('#irc .join, #irc .quit, #irc .part').show();
 	}
 } 
+
+function hideGitHub() {
+	if ($('#github-toggle').is(':checked')) {
+		$('#irc .github').hide();
+	} else {
+		$('#irc .github').show();
+	}
+}
 
 function toggleInlineMedia() {
 	if ($('#inline-media-toggle').is(':checked')) {
@@ -446,7 +458,7 @@ function irc_render( item )
 		message_tag = "";
 	}
 	
-	var construct_string = "<li data-channel="+ html_escape(item.channel) +" id='irc-"+item.id+"' class='"+item.type+" "+message_tag+" " + tag_tag + "'>";
+	var construct_string = "<li data-channel="+ html_escape(item.channel) +" id='irc-"+item.id+"' class='"+item.type+" "+message_tag+" " + tag_tag + (item.name=="ev3dev-github"?" github":"") + "'>";
 	construct_string += "<span class='name'><a href='#id-"+item.id+"'>" + html_escape(item.name) + "</a>&nbsp;</span><span class='message'>";
 	
 	if (item.type == "join") { construct_string += "has joined #" + html_escape(item.channel); }

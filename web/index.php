@@ -51,10 +51,13 @@ $channels = $pdb->get_channels() ;
 		<a id="prev" class='toolbutton' href="#">&laquo;</a> 
 		<a id="next" class='toolbutton' href="#">&raquo;</a> 
 	</span>
-	<span id="hide-join-quit">
+	<span id="hide-join-quit" class="checkbox">
 		<label><input id="join-quit-toggle" type="checkbox" /> hide join/quit</label>
 	</span>
-	<span id="inline-media-menu">
+	<span id="hide-github" class="checkbox">
+		<label><input id="github-toggle" type="checkbox" /> hide github</label>
+	</span>
+	<span id="inline-media-menu" class="checkbox">
 		<label><input id="inline-media-toggle" type="checkbox" checked="checked" /> enable inline media</label>
 	</span>
 	<img id="loading" src="<?php config::get_theme("ajax-loader.gif") ?>"/>

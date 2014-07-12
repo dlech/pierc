@@ -109,8 +109,14 @@ a {
 		background-color: #fff
 	}
 
-	#hide-join-quit label, #inline-media-menu label {
+	.checkbox label {
+		white-space: nowrap;
 		font-size: 12px;
+	}
+	.checkbox input {
+		vertical-align: middle;
+		bottom: 2px;
+		position: relative;
 	}
 
 	#loading {
