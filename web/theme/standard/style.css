@@ -292,3 +292,15 @@ a {
 	width: 95%;
 	margin: auto;
 }
+
+@media screen and (max-width: 750px) {
+	#toolbar {
+		height: 60px;
+	}	
+}
+
+@media screen and (max-width: 480px) {
+	#toolbar {
+		height: 80px;
+	}	
+}
