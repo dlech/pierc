@@ -208,6 +208,7 @@ function home()
 			window.location.hash = "home";
 			hash = window.location.hash;
 			hideJoinQuit();
+			hideGitHub();
 			displayInlineMedia();
 			scroll_to_bottom();
 		}, 
@@ -280,6 +281,7 @@ function search_for( searchvalue )
 		
 		highlight( searchvalue );
 		hideJoinQuit();
+		hideGitHub();
 		displayInlineMedia();
 		scroll_to_bottom();
         }).error(everything_has_failed);
@@ -321,7 +323,8 @@ function context(id)
         	window.location.hash = "id-"+id;
         	hash = window.location.hash;
         	hideJoinQuit();
-        	displayInlineMedia();
+		hideGitHub();
+		displayInlineMedia()
         	scroll_to_id( id );
         }).error(everything_has_failed);
     
@@ -369,7 +372,8 @@ function page_up()
 			first_id = item.id; 
 		});
         	hideJoinQuit();
-  				displayInlineMedia(); 
+		hideGitHub();
+		displayInlineMedia();
         	scroll_to_id( first_id );
 		done_loading();
         }).error(everything_has_failed);
@@ -392,7 +396,8 @@ function page_down()
 			last_id = item.id; 
 		});
         	hideJoinQuit();
-  				displayInlineMedia(); 
+		hideGitHub();
+		displayInlineMedia();
         	scroll_to_bottom();
 		done_loading();
         }).error(everything_has_failed);
@@ -432,7 +437,8 @@ function tag( tagname )
         									
 		done_loading();
         	hideJoinQuit();
-  				displayInlineMedia(); 
+		hideGitHub();
+		displayInlineMedia();
         	scroll_to_bottom();
         }).error(everything_has_failed);
     return false;
