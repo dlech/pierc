@@ -48,8 +48,8 @@ class Logger(irclib.SimpleIRCClient):
 		self.mysql_password = mysql_password
 		
 		#Regexes
-		self.nick_reg = re.compile("^" + nick + "[:,](?iu)")
-		
+		self.nick_reg = re.compile("^" + nick + "[:,]\s*(.*)")
+
 		#Message Cache
 		self.message_cache = []		#messages are stored here before getting pushed to the db
 		
@@ -165,13 +165,14 @@ class Logger(irclib.SimpleIRCClient):
 		text = event.arguments()[0]
 
 		# If you talk to the bot, this is how he responds.
-		if self.nick_reg.search(text):
-			if text.split(" ")[1] and text.split(" ")[1] == "ping":
+		match = self.nick_reg.match(text)
+		if match:
+			match = match.group(1)
+			if match == "ping":
 				connection.privmsg(self.channel, "pong")
 				self.on_ping(connection, event)
-				return
-
-			connection.privmsg(self.channel, "I don't know what that means.")
+			else:
+				connection.privmsg(self.channel, "I don't know what that means.")
 
 def main():
 	mysql_settings = config.config("mysql_config.txt")
