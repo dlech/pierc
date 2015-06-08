@@ -1,0 +1,6 @@
+host: example.com
+protocol: https
+port: 1234
+username: user
+password: secret
+download_dir: /home/user/Downloads
