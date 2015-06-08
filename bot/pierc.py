@@ -145,7 +145,7 @@ class Logger(irclib.SimpleIRCClient):
 				db.insert_line(message["channel"], message["name"], message["time"], message["message"], message["type"] )
 
 			db.commit()
-			if self.disconnect_countdown < 5:
+			if self.disconnect_countdown < 10:
 				self.disconnect_countdown = self.disconnect_countdown + 1
 			
 			del db
