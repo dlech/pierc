@@ -1,5 +1,6 @@
 config.php
 mysql_config.txt
 irc_config.txt
+webdav_config.txt
 *.pyc
 .pydevproject
