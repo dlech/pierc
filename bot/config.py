@@ -32,3 +32,6 @@ if __name__ == "__main__":
     irc_config = config("irc_config.txt")
     for key,value in irc_config.iteritems():
         print key, value
+    webdav_config = config("webdav_config.txt")
+    for key,value in webdav_config.iteritems():
+        print key, value

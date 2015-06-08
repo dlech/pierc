@@ -7,6 +7,8 @@ import sys
 import re
 import time
 import datetime
+import easywebdav
+import subprocess
 
 #mine
 import pierc_db
@@ -20,9 +22,8 @@ class Logger(irclib.SimpleIRCClient):
 	def __init__(self, server, port, channel, nick, password, username,
 				ircname, topic, localaddress, localport, ssl, ipv6,
 				mysql_server, mysql_port, mysql_database,
-				mysql_user, mysql_password):
+				mysql_user, mysql_password, webdav_settings):
 
-	
 		irclib.SimpleIRCClient.__init__(self)
 		
 		#IRC details
@@ -46,10 +47,20 @@ class Logger(irclib.SimpleIRCClient):
 		self.mysql_database = mysql_database
 		self.mysql_user = mysql_user
 		self.mysql_password = mysql_password
-		
+
+		#webdav
+		self.webdav = easywebdav.connect(webdav_settings['host'],
+			port=int(webdav_settings.get('port', 0)),
+			username=webdav_settings['username'],
+			password=webdav_settings['password'],
+			protocol=webdav_settings['protocol'],
+			verify_ssl=bool(webdav_settings.get('verify_ssl', 'True') in [ 'True' ])
+			)
+		self.webdav_download_dir = webdav_settings.get('download_dir', '.')
+
 		#Regexes
-		self.nick_reg = re.compile("^" + nick + "[:,](?iu)")
-		
+		self.nick_reg = re.compile("^" + nick + "[:,]\s*(.*)")
+
 		#Message Cache
 		self.message_cache = []		#messages are stored here before getting pushed to the db
 		
@@ -165,17 +176,50 @@ class Logger(irclib.SimpleIRCClient):
 		text = event.arguments()[0]
 
 		# If you talk to the bot, this is how he responds.
-		if self.nick_reg.search(text):
-			if text.split(" ")[1] and text.split(" ")[1] == "ping":
-				connection.privmsg(self.channel, "pong")
-				self.on_ping(connection, event)
-				return
+		match = self.nick_reg.match(text)
+		if not match:
+			return
 
+		match = match.group(1)
+
+		if match == "ping":
+			connection.privmsg(self.channel, "pong")
+			self.on_ping(connection, event)
+
+		if match == "check incoming":
+			connection.privmsg(self.channel, "checking for incoming debian packages...")
+			try:
+				files = self.webdav.ls('/debian')
+				if len(files) == 1:
+					connection.privmsg(self.channel, "No files to download.")
+					return
+				changes_files = []
+				for f in files:
+					if f.contenttype == 'httpd/unix-directory':
+						continue
+					connection.privmsg(self.channel, "downloading " + f.name)
+					local_file = f.name.replace('/debian', self.webdav_download_dir)
+					if local_file[-8:] == '.changes':
+						changes_files.append(local_file)
+					self.webdav.download(f.name, local_file)
+					self.webdav.delete(f.name)
+				if len(changes_files) == 0:
+					connection.privmsg(self.channel, "No .changes files found.")
+					return
+				for f in changes_files:
+					connection.privmsg(self.channel, "submitting " + f.split('/')[-1])
+					subprocess.check_call(['dput', 'ev3dev.org', f])
+				connection.privmsg(self.channel, "Done! You should receive an email soon.")
+			except Exception, e:
+				connection.privmsg(self.channel, e)
+
+		else:
 			connection.privmsg(self.channel, "I don't know what that means.")
 
 def main():
 	mysql_settings = config.config("mysql_config.txt")
 	irc_settings = config.config("irc_config.txt")
+	webdav_settings = config.config("webdav_config.txt")
 	c = Logger(
 				irc_settings["server"], 
 				int(irc_settings["port"]), 
@@ -194,7 +238,10 @@ def main():
 				int(mysql_settings["port"]),
 				mysql_settings["database"],
 				mysql_settings["user"],
-				mysql_settings["password"] ) 
+				mysql_settings["password"],
+
+				webdav_settings
+				)
 	c.start()
 
 if __name__ == "__main__":
