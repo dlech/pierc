@@ -31,7 +31,7 @@ class Pierc_DB:
 				message TEXT,
 				type    VARCHAR(10),
 				hidden  CHAR(1)
-			) engine = InnoDB;
+			) engine = InnoDB DEFAULT CHARSET=utf8;
 			
 			""")
 

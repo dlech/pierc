@@ -14,6 +14,7 @@ class db_class
 		if ($this->_conn->connect_error){
 			die ("Could not connect: " . $this->_conn->connect_error );
 		}
+		$this->_conn->set_charset("utf8");
 
 		// Verify that we received a proper time zone, otherwise fall back to default
 		$allZones = DateTimeZone::listIdentifiers();
