@@ -74,7 +74,7 @@ $channels = $pdb->get_channels() ;
 		<li> If you're not the maintainer of this site, please report it to... that guy. Boy is <em>he</em> in trouble. </li>
 		<li> Did you follow the <a href="http://classam.github.com/pierc/">installation steps</a> properly? </li>
 		<li> You're a smart guy (or girl). You have access to the source code. Figure it out. </li>
-		<li> If you find a problem with the code (almost certain), please report it <a href='https://github.com/classam/pierc/issues'>here</a>. </li>
+		<li> If you find a problem with the code (almost certain), please report it <a href='https://github.com/dlech/pierc/issues'>here</a>. </li>
 		<li> This error isn't going away until you restart the page. </li>
 	</ul>
 </div>
