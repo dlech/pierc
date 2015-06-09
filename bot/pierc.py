@@ -121,6 +121,18 @@ class Logger(irclib.SimpleIRCClient):
 		if hasattr(self, m):
 			getattr(self, m)(c, e)
 
+	def send_msg(self, connection, text):
+		connection.privmsg(self.channel, text)
+		#irclib does not pickup messages sent by self
+		message_dict = {
+			"channel": self.channel[1:],
+			"name": self.nick,
+			"message": text,
+			"type": "pubmsg",
+			"time": str(datetime.datetime.utcnow())
+		}
+		self.message_cache.append(message_dict)
+
 	def on_nicknameinuse(self, c, e):
 		c.nick(c.get_nickname() + "_")
 
@@ -169,7 +181,7 @@ class Logger(irclib.SimpleIRCClient):
 			if self.disconnect_countdown <= 0:
 				sys.exit( 0 )
 			if self.disconnect_countdown <= 3:
-				connection.privmsg(self.channel, "Database connection lost! " + str(self.disconnect_countdown) + " retries until I give up entirely!" )
+				self.send_msg(connection, "Database connection lost! " + str(self.disconnect_countdown) + " retries until I give up entirely!" )
 			self.disconnect_countdown = self.disconnect_countdown - 1
 
 	def on_pubmsg(self, connection, event):
@@ -183,38 +195,38 @@ class Logger(irclib.SimpleIRCClient):
 		match = match.group(1)
 
 		if match == "ping":
-			connection.privmsg(self.channel, "pong")
+			self.send_msg(connection, "pong")
 			self.on_ping(connection, event)
 
-		if match == "check incoming":
-			connection.privmsg(self.channel, "checking for incoming debian packages...")
+		elif match == "check incoming":
+			self.send_msg(connection, "checking for incoming debian packages...")
 			try:
 				files = self.webdav.ls('/debian')
 				if len(files) == 1:
-					connection.privmsg(self.channel, "No files to download.")
+					self.send_msg(connection, "No files to download.")
 					return
 				changes_files = []
 				for f in files:
 					if f.contenttype == 'httpd/unix-directory':
 						continue
-					connection.privmsg(self.channel, "downloading " + f.name)
+					self.send_msg(connection, "downloading " + f.name)
 					local_file = f.name.replace('/debian', self.webdav_download_dir)
 					if local_file[-8:] == '.changes':
 						changes_files.append(local_file)
 					self.webdav.download(f.name, local_file)
 					self.webdav.delete(f.name)
 				if len(changes_files) == 0:
-					connection.privmsg(self.channel, "No .changes files found.")
+					self.send_msg(connection, "No .changes files found.")
 					return
 				for f in changes_files:
-					connection.privmsg(self.channel, "submitting " + f.split('/')[-1])
+					self.send_msg(connection, "submitting " + f.split('/')[-1])
 					subprocess.check_call(['dput', 'ev3dev.org', f])
-				connection.privmsg(self.channel, "Done! You should receive an email soon.")
+				self.send_msg(connection, "Done! You should receive an email soon.")
 			except Exception, e:
-				connection.privmsg(self.channel, e)
+				self.send_msg(connection, e)
 
 		else:
-			connection.privmsg(self.channel, "I don't know what that means.")
+			self.send_msg(connection, "I don't know what that means.")
 
 def main():
 	mysql_settings = config.config("mysql_config.txt")
