@@ -4,3 +4,4 @@ irc_config.txt
 webdav_config.txt
 *.pyc
 .pydevproject
+.idea
