@@ -10,7 +10,8 @@ class PiercDb:
                                     port=port,
                                     user=user,
                                     passwd=password,
-                                    db=database)
+                                    db=database,
+                                    charset='utf8')
         self.cursor = self.conn.cursor()
 
     def __del__(self):
