@@ -11,7 +11,7 @@ def config(filename):
         config_data = dict()
         db_file = open(filename, "r")
         for line in db_file:
-            if line.startswith("#"):
+            if not line.strip() or line.startswith("#"):
                 continue
             idx = line.index(":")
             key = line[0:idx]
