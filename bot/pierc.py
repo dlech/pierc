@@ -8,6 +8,7 @@ import re
 import time
 import datetime
 import easywebdav
+import urllib
 
 # mine
 import piercdb
@@ -172,7 +173,7 @@ class Logger(irclib.SimpleIRCClient):
             changes_files = []
 
             def download(name):
-                local_file = self.webdav_download_dir + name
+                local_file = self.webdav_download_dir + urllib.unquote(name)
                 self.send_msg(connection, "downloading {}".format(name))
                 self.webdav.download(name, local_file)
                 print("downloaded {}".format(local_file))
