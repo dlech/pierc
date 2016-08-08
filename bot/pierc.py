@@ -127,7 +127,7 @@ class Logger(irclib.SimpleIRCClient):
         message_dict = {
             "channel": self.channel[1:],
             "name": self.nick,
-            "message": str(text),
+            "message": text,
             "type": "pubmsg",
             "time": str(datetime.datetime.utcnow())
         }
@@ -155,37 +155,6 @@ class Logger(irclib.SimpleIRCClient):
         self.on_ping(connection, event)
         connection.disconnect()
         raise irclib.ServerNotConnectedError
-
-    def check_incoming(self, connection, verbose=False):
-        if verbose:
-            self.send_msg(connection, "checking for incoming debian packages...")
-        try:
-            files = self.webdav.ls('/debian')
-            if len(files) == 1:
-                if verbose:
-                    self.send_msg(connection, "No files to download.")
-                return
-            self.send_msg(connection, "Found some incoming packages...")
-            changes_files = []
-            for f in files:
-                if f.contenttype == 'httpd/unix-directory':
-                    continue
-                self.send_msg(connection, "downloading " + f.name)
-                local_file = f.name.replace('/debian', self.webdav_download_dir)
-                if local_file[-8:] == '.changes':
-                    changes_files.append(local_file)
-                self.webdav.download(f.name, local_file)
-                print("downloaded {}".format(local_file))
-                self.webdav.delete(f.name)
-            if len(changes_files) == 0:
-                self.send_msg(connection, "No .changes files found.")
-                return
-            for f in changes_files:
-                self.send_msg(connection, "submitting " + f.split('/')[-1])
-                subprocess.check_call(['dput', 'ev3dev.org', f])
-            self.send_msg(connection, "Done! You should receive an email soon.")
-        except Exception, e:
-            self.send_msg(connection, e)
 
     def on_ping(self, connection, event):
         self.last_ping = 0
@@ -217,8 +186,6 @@ class Logger(irclib.SimpleIRCClient):
                     self.disconnect_countdown) + " retries until I give up entirely!")
             self.disconnect_countdown -= 1
 
-        self.check_incoming(connection)
-
     def on_pubmsg(self, connection, event):
         text = event.arguments()[0]
 
@@ -234,10 +201,31 @@ class Logger(irclib.SimpleIRCClient):
             self.on_ping(connection, event)
 
         elif match == "check incoming":
-            self.check_incoming(connection, verbose=True)
-
-        elif match == "do you like robots?":
-            self.send_msg(connection, "Of course!")
+            self.send_msg(connection, "checking for incoming debian packages...")
+            try:
+                files = self.webdav.ls('/debian')
+                if len(files) == 1:
+                    self.send_msg(connection, "No files to download.")
+                    return
+                changes_files = []
+                for f in files:
+                    if f.contenttype == 'httpd/unix-directory':
+                        continue
+                    self.send_msg(connection, "downloading " + f.name)
+                    local_file = f.name.replace('/debian', self.webdav_download_dir)
+                    if local_file[-8:] == '.changes':
+                        changes_files.append(local_file)
+                    self.webdav.download(f.name, local_file)
+                    self.webdav.delete(f.name)
+                if len(changes_files) == 0:
+                    self.send_msg(connection, "No .changes files found.")
+                    return
+                for f in changes_files:
+                    self.send_msg(connection, "submitting " + f.split('/')[-1])
+                    subprocess.check_call(['dput', 'ev3dev.org', f])
+                self.send_msg(connection, "Done! You should receive an email soon.")
+            except Exception, e:
+                self.send_msg(connection, e)
 
         else:
             self.send_msg(connection, "I don't know what that means.")
