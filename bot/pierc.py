@@ -173,9 +173,8 @@ class Logger(irclib.SimpleIRCClient):
             changes_files = []
 
             def download(name):
-                unescaped_name = urllib.unquote(name)
-                local_file = self.webdav_download_dir + unescaped_name
-                self.send_msg(connection, "downloading {}".format(unescaped_name))
+                local_file = self.webdav_download_dir + urllib.unquote(name)
+                self.send_msg(connection, "downloading {}".format(name))
                 self.webdav.download(name, local_file)
                 print("downloaded {}".format(local_file))
                 self.webdav.delete(name)
