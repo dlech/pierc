@@ -8,6 +8,7 @@ import re
 import time
 import datetime
 import easywebdav
+import subprocess
 
 # mine
 import piercdb
@@ -159,38 +160,29 @@ class Logger(irclib.SimpleIRCClient):
         if verbose:
             self.send_msg(connection, "checking for incoming debian packages...")
         try:
-            files = self.webdav.ls('debian/incoming') + \
-                    self.webdav.ls('raspbian/incoming') + \
-                    self.webdav.ls('ubuntu/incoming')
-            # each ls returns an item for the directory, so if there are only 3 files, the directories are empty
-            if len(files) <= 3:
+            files = self.webdav.ls('/debian')
+            if len(files) == 1:
                 if verbose:
                     self.send_msg(connection, "No files to download.")
                 return
-
             self.send_msg(connection, "Found some incoming packages...")
             changes_files = []
-
-            def download(name):
-                local_file = self.webdav_download_dir + name
-                self.send_msg(connection, "downloading {}".format(name))
-                self.webdav.download(name, local_file)
-                print("downloaded {}".format(local_file))
-                self.webdav.delete(name)
-
             for f in files:
                 if f.contenttype == 'httpd/unix-directory':
                     continue
-                if f.name[-8:] == '.changes':
-                    changes_files.append(f)
-                else:
-                    # download .changes files last because they trigger the handler on the server
-                    download(f.name)
+                self.send_msg(connection, "downloading " + f.name)
+                local_file = f.name.replace('/debian', self.webdav_download_dir)
+                if local_file[-8:] == '.changes':
+                    changes_files.append(local_file)
+                self.webdav.download(f.name, local_file)
+                print("downloaded {}".format(local_file))
+                self.webdav.delete(f.name)
             if len(changes_files) == 0:
                 self.send_msg(connection, "No .changes files found.")
                 return
             for f in changes_files:
-                download(f.name)
+                self.send_msg(connection, "submitting " + f.split('/')[-1])
+                subprocess.check_call(['dput', 'ev3dev.org', f])
             self.send_msg(connection, "Done! You should receive an email soon.")
         except Exception, e:
             self.send_msg(connection, e)
